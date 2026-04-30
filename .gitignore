@@ -2,4 +2,5 @@ node_modules/
 public/
 *.lock
 .firebase/
+.firebaserc
 .DS_Store
