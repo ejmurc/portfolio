@@ -14,13 +14,13 @@ main {
 }
 
 img {
-    width: 150px;
+    width: 100px;
+    height: 100px;
     margin-bottom: 1rem;
     display: block;
 }
 
 h1 {
-    font-size: 1.75rem;
     line-height: 1.5;
     font-weight: 600;
     margin: 0 0 1rem;
