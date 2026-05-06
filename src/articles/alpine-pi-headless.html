@@ -7,11 +7,19 @@ summary: A guide to installing Alpine Linux on Raspberry Pi 3 in Diskless Mode w
 <h2>Background</h2>
 <p>
     This project was prompted by the need to repurpose a Raspberry Pi 3B for a
-    new development cycle requiring <a href="https://man7.org/linux/man-pages/man7/io_uring.7.html" target="_blank">Linux-specific APIs</a>. Having returned home
-    post-graduation, I found the device’s original network credentials were
-    outdated as my parents changed our WiFi provider.</p>
+    new development cycle requiring
+    <a
+        href="https://man7.org/linux/man-pages/man7/io_uring.7.html"
+        target="_blank"
+        >Linux-specific APIs</a
+    >. Having returned home post-graduation, I found the device’s original
+    network credentials were outdated as my parents changed our WiFi provider.
+</p>
 <p>
-Without local peripherals to manually reconfigure the interface, I needed a deployment strategy that prioritized automated networking and remote accessibility. This also gave me an opportunity to select a headless distribution due to the fact that I rarely use the GUI.
+    Without local peripherals to manually reconfigure the interface, I needed a
+    deployment strategy that prioritized automated networking and remote
+    accessibility. This also gave me an opportunity to select a headless
+    distribution due to the fact that I rarely use the GUI.
 </p>
 <h2>Why Alpine?</h2>
 <p>
@@ -57,7 +65,10 @@ mount -o remount,ro /media/mmcblk0p1</pre
 <h2>setup-alpine</h2>
 <p>Run <code>setup-alpine</code> and work through the prompts.</p>
 <p>Use <code>wlan0</code> for the network interface.</p>
-<p>You should create a user profile and prevent root logins as well. Root will be accessible through doas.</p>
+<p>
+    You should create a user profile and prevent root logins as well. Root will
+    be accessible through doas.
+</p>
 <p>
     Set the hostname in the running session too, since setup-alpine only sets it
     for future boots:
@@ -84,9 +95,8 @@ apk cache sync</pre
 <p>
     If your primary WiFi changes and you have no physical access to the Pi, a
     fallback network (a phone hotspot works well) keeps SSH reachable.
-    <code>wpa_supplicant</code> supports multiple networks natively, 
-    connecting to whichever is available, preferring higher
-    <code>priority</code> values:
+    <code>wpa_supplicant</code> supports multiple networks natively, connecting
+    to whichever is available, preferring higher <code>priority</code> values:
 </p>
 <pre>
 # /etc/wpa_supplicant/wpa_supplicant.conf
@@ -172,5 +182,6 @@ tar xOf /Volumes/ALPINE/pi.apkovl.tar.gz \
 
 <h3>5GHz WiFi</h3>
 <p>
-    The Pi 3 is 2.4GHz only. If you configure an SSID running 5GHz, the Pi will never connect.
+    The Pi 3 is 2.4GHz only. If you configure an SSID running 5GHz, the Pi will
+    never connect.
 </p>
