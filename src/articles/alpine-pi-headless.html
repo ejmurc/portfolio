@@ -1,0 +1,176 @@
+<!--
+title: Setting Up Alpine Linux Headlessly on a Raspberry Pi 3
+date: 2026-05-02T12:54:00Z
+tag: Networking
+summary: A guide to installing Alpine Linux on Raspberry Pi 3 in Diskless Mode without local peripherals, ensuring SSH access persists across reboots with multi-SSID configuration, and an SD card failover strategy for headless recovery.
+-->
+<h2>Background</h2>
+<p>
+    This project was prompted by the need to repurpose a Raspberry Pi 3B for a
+    new development cycle requiring <a href="https://man7.org/linux/man-pages/man7/io_uring.7.html" target="_blank">Linux-specific APIs</a>. Having returned home
+    post-graduation, I found the device’s original network credentials were
+    outdated as my parents changed our WiFi provider.</p>
+<p>
+Without local peripherals to manually reconfigure the interface, I needed a deployment strategy that prioritized automated networking and remote accessibility. This also gave me an opportunity to select a headless distribution due to the fact that I rarely use the GUI.
+</p>
+<h2>Why Alpine?</h2>
+<p>
+    Alpine's diskless mode runs the OS entirely from RAM, and SD cards last much
+    longer when they're rarely written to. It's footprint is also
+    <a href="https://alpinelinux.org/about/" target="_blank">very small</a>,
+    making it perfect for programming on the Raspberry Pi.
+</p>
+<h2>First Boot with Headless Bootstrap</h2>
+<p>
+    Write an Alpine Linux Pi image to your SD card. Then download
+    <code>headless.apkovl.tar.gz</code> from
+    <a href="https://github.com/macmpi/alpine-linux-headless-bootstrap"
+        >macmpi/alpine-linux-headless-bootstrap</a
+    >
+    and place it on the boot partition alongside a
+    <code>wpa_supplicant.conf</code> with your WiFi credentials:
+</p>
+<pre>
+ctrl_interface=/var/run/wpa_supplicant
+ctrl_interface_group=wheel
+update_config=1
+
+network={
+    ssid="YourNetwork"
+    psk="yourpassword"
+}</pre
+>
+<p>
+    Boot the Pi and wait about 10–20 seconds. The bootstrap script connects to
+    WiFi and starts a temporary SSH server with no password. Find the IP from
+    your router or with:
+</p>
+<pre>sudo arp-scan -lI en0</pre>
+<p>
+    SSH in as root, then remove the bootstrap overlay so it doesn't run again:
+</p>
+<pre>
+mount -o remount,rw /media/mmcblk0p1
+rm /media/mmcblk0p1/headless.apkovl.tar.gz
+mount -o remount,ro /media/mmcblk0p1</pre
+>
+<h2>setup-alpine</h2>
+<p>Run <code>setup-alpine</code> and work through the prompts.</p>
+<p>Use <code>wlan0</code> for the network interface.</p>
+<p>You should create a user profile and prevent root logins as well. Root will be accessible through doas.</p>
+<p>
+    Set the hostname in the running session too, since setup-alpine only sets it
+    for future boots:
+</p>
+<pre>hostname yourshortname</pre>
+<p>Commit everything to the overlay:</p>
+<pre>
+lbu add /etc/ssh
+lbu commit -d
+apk cache sync</pre
+>
+<p>
+    In diskless Alpine, <code>lbu commit</code> is how changes survive reboot.
+    Without it, nothing is persisted.
+</p>
+<p>Before rebooting, restart sshd and verify you can still connect:</p>
+<pre>rc-service sshd restart</pre>
+<p>
+    Note: restarting sshd regenerates the host keys. Your SSH client will refuse
+    the connection citing a key mismatch, so delete the old entry from
+    <code>~/.ssh/known_hosts</code> first.
+</p>
+<h2>WiFi Fallback Networks</h2>
+<p>
+    If your primary WiFi changes and you have no physical access to the Pi, a
+    fallback network (a phone hotspot works well) keeps SSH reachable.
+    <code>wpa_supplicant</code> supports multiple networks natively, 
+    connecting to whichever is available, preferring higher
+    <code>priority</code> values:
+</p>
+<pre>
+# /etc/wpa_supplicant/wpa_supplicant.conf
+country=US
+ctrl_interface=/var/run/wpa_supplicant
+ctrl_interface_group=wheel
+update_config=1
+
+network={
+    ssid="YourMainNetwork"
+    psk="mainpassword"
+    priority=10
+}
+
+network={
+    ssid="YourHotspot"
+    psk="hotspotpassword"
+    priority=5
+}</pre
+>
+<p>
+    The header lines are required. Without
+    <code>ctrl_interface</code> and <code>update_config</code>, wpa_supplicant
+    may not parse the file. The <code>country</code> code matters for hotspots —
+    some channels are restricted by region.
+</p>
+<p>
+    If an SSID contains an apostrophe (common in iPhone hotspot names), encode
+    it as hex to avoid parse errors:
+</p>
+<pre>echo -n "Someone's iPhone" | xxd -p | tr -d '\n'</pre>
+<p>Use the hex output as the ssid value without quotes:</p>
+<pre>
+network={
+    ssid=536f6d656f6e657320694f70686f6e65
+    psk="hotspotpassword"
+    priority=5
+}</pre
+>
+
+<p>Commit after editing:</p>
+<pre>lbu commit -d</pre>
+
+<h2>Recovering via SD Card</h2>
+
+<p>
+    If you lose SSH access entirely, you can edit the overlay directly. The boot
+    partition is FAT32 and mounts automatically on a Mac. The overlay is
+    <code>hostname.apkovl.tar.gz</code>:
+</p>
+
+<pre>
+mkdir ~/apkovl
+cd ~/apkovl
+tar xzf /Volumes/ALPINE/pi.apkovl.tar.gz
+
+vim etc/wpa_supplicant/wpa_supplicant.conf
+
+dot_clean /Volumes/ALPINE/
+tar czf /Volumes/ALPINE/pi.apkovl.tar.gz .
+dot_clean /Volumes/ALPINE/
+diskutil eject /dev/disk2</pre
+>
+
+<p>To verify the tarball contains your edits before ejecting:</p>
+
+<pre>
+tar xOf /Volumes/ALPINE/pi.apkovl.tar.gz \
+  etc/wpa_supplicant/wpa_supplicant.conf</pre
+>
+
+<h2>Pitfalls</h2>
+
+<h3>Mac Resource Fork Files</h3>
+<p>
+    macOS creates <code>._filename</code> metadata files on FAT32 volumes.
+    Alpine picks the first <code>.apkovl.tar.gz</code> alphabetically, so
+    <code>._pi.apkovl.tar.gz</code> sorts before
+    <code>pi.apkovl.tar.gz</code> and will be loaded instead of yours. Always
+    run <code>dot_clean /Volumes/ALPINE/</code> after repacking and before
+    ejecting.
+</p>
+
+<h3>5GHz WiFi</h3>
+<p>
+    The Pi 3 is 2.4GHz only. If you configure an SSID running 5GHz, the Pi will never connect.
+</p>

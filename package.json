@@ -4,28 +4,18 @@
     "repository": "https://github.com/eliasmurcray/portfolio.git",
     "author": "Elias Murcray",
     "license": "MIT",
+    "type": "module",
     "scripts": {
-        "build": "node esbuild.mjs --prod",
-        "start": "node esbuild.mjs",
-        "format": "prettier -w .",
-        "lint": "eslint .",
-        "lint:fix": "eslint . --fix"
-    },
-    "dependencies": {
-        "prettier": "^3.3.3",
-        "typescript": "^5.5.4"
+        "build": "tsx build.ts",
+        "start": "tsx build.ts --serve",
+        "format": "prettier -w ."
     },
     "devDependencies": {
-        "@craftamap/esbuild-plugin-html": "^0.9.0",
-        "@typescript-eslint/eslint-plugin": "^8.5.0",
-        "@typescript-eslint/parser": "^8.5.0",
-        "esbuild": "^0.27.3",
-        "esbuild-copy-static-files": "^0.1.0",
-        "esbuild-plugin-copy": "^2.1.1",
-        "eslint": "^9.10.0",
-        "eslint-plugin-react": "^7.36.1",
-        "firebase": "^10.13.1",
-        "globals": "^15.9.0",
-        "typescript-eslint": "^8.5.0"
+        "@types/html-minifier-terser": "^7.0.2",
+        "@types/jsdom": "^28.0.1",
+        "esbuild": "^0.28.0",
+        "html-minifier-terser": "^7.2.0",
+        "jsdom": "^29.1.1",
+        "tsx": "^4.21.0"
     }
 }

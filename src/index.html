@@ -4,35 +4,49 @@
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width,initial-scale=1" />
         <title>Elias Murcray</title>
+        <style>
+            {{ styles }}
+        </style>
     </head>
     <body>
+        <header>
+            [ <a href="/">home</a> ] [ <a href="/writings">writings</a> ]
+        </header>
         <main>
-            <img src="./ejmurc.webp" width="150" height="150" />
-            <h1>Elias Murcray</h1>
+            <img
+                src="./ejmurc.webp"
+                alt="Elias's headshot"
+                width="100"
+                height="100"
+            />
+            <h1>Elias Murcray's Portfolio</h1>
             <p>
-                Hello! Welcome to my portfolio! I am a Software Engineer at
-                Google Meet working on Take Notes with Gemini, where I
-                focus on evaluating and improving the quality of AI-generated
-                meeting summaries. My path here included building performance
-                regression detection for AWS Lambda, improving USB device
-                isolation on Google's Fuchsia testing infrastructure, and
-                designing activation experiments for Take Notes with Gemini as a
-                prior intern on the same team.
+                Welcome! This website contains a selection of personal projects
+                and technical write-ups, with the intention of centralizing and
+                documenting my achievements and learnings.
             </p>
             <p>
-                For any inquiries, contact me at ejmurc@gmail.com. Feel free to
-                connect at
-                <a
-                    href="https://www.linkedin.com/in/ejmurc"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    >linkedin.com/in/ejmurc</a
-                >.
+                The first of my writings will be here, concisely, to explain the
+                intention behind the website's styling. As I am often prone to
+                spending too much time perfecting a single component of a
+                project and therefore never releasing it, I've made the decision
+                to create a minimal stylesheet that is intentionally
+                "un-designed" but readable, with inspiration taken from
+                <a href="https://lwn.net/" target="_blank">LWN.net</a>.
             </p>
-            <h2 id="projects">Projects</h2>
-            <p>None yet.</p>
-            <h2 id="Writings">Writings</h2>
-            <p>None yet.</p>
+            <p>
+                The stylesheet and all website content can be found
+                <a href="https://github.com/ejmurc/portfolio" target="_blank"
+                    >here</a
+                >. While there was some intention behind the design decisions
+                for the bundling process, it was straightforward to set up and
+                beneficial in the long term: all content is to be served in the
+                most efficient way possible, because why not.
+            </p>
+            <h2 id="writings">Writings</h2>
+            <ul>
+                {{ writings }}
+            </ul>
         </main>
     </body>
 </html>
