@@ -277,5 +277,9 @@ if (isDev) {
     await ctx.serve({ servedir: OUTDIR, port: 3000 });
     console.log('Server running at http://localhost:3000');
 } else {
+    await fs.promises.rm(OUTDIR, { recursive: true, force: true });
+    await fs.promises.cp('./src/assets', path.join(OUTDIR, './'), {
+        recursive: true,
+    });
     await esbuild.build({ ...config, minify: true });
 }
